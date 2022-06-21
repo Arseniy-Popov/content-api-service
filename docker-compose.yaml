@@ -1,0 +1,58 @@
+services:
+    app:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        volumes:
+            - ./:/app
+        environment:
+            - ENVIRONMENT=production
+            - PYTHONUNBUFFERED=1
+            - PYTHONDONTWRITEBYTECODE=1
+            - REDIS_PATH=redis://redis:6379/0
+            - ELASTICSEARCH_PATH=http://elasticsearch:9200
+        env_file:
+            - ./.env
+        networks:
+          - cinema-network
+        restart: unless-stopped
+    nginx:
+        build: ./infra/nginx
+        ports:
+            - 80:80
+        depends_on:
+            - app
+        networks:
+          - cinema-network
+        restart: unless-stopped
+    elasticsearch:
+        image: elasticsearch:8.2.2
+        environment:
+            - discovery.type=single-node
+            - xpack.security.http.ssl.enabled=false
+            - xpack.security.enabled=false
+        volumes:
+            - elasticsearch:/usr/share/elasticsearch/data
+        expose:
+            - 9200
+        ports:
+            - 9200:9200
+        networks:
+          - cinema-network
+        restart: unless-stopped
+    redis:
+        image: redis
+        expose:
+            - 6379
+        ports:
+            - 6379:6379
+        networks:
+          - cinema-network
+        restart: unless-stopped
+
+volumes:
+    elasticsearch:
+
+networks:
+  cinema-network:
+    name: cinema-network
