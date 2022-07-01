@@ -35,8 +35,6 @@ services:
             - elasticsearch:/usr/share/elasticsearch/data
         expose:
             - 9200
-        ports:
-            - 9200:9200
         networks:
           - cinema-network
         restart: unless-stopped
@@ -44,8 +42,6 @@ services:
         image: redis
         expose:
             - 6379
-        ports:
-            - 6379:6379
         networks:
           - cinema-network
         restart: unless-stopped
