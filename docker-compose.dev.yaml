@@ -7,10 +7,3 @@ services:
     redis:
         ports:
             - 6379:6379
-
-volumes:
-    elasticsearch:
-
-networks:
-    cinema-network:
-        name: cinema-network
