@@ -1,4 +1,4 @@
-import os
+import multiprocessing
 from enum import Enum
 from logging import config as logging_config
 
@@ -19,35 +19,35 @@ class Environment(BaseSettings):
     ENVIRONMENT: EnvTypes = EnvTypes.DEV
 
 
-class Config(BaseSettings):
+class ProdConfig(BaseSettings):
     class Config:
         env_prefix = ""
         env_file = ".env"
 
+    ENVIRONMENT: EnvTypes = EnvTypes.DEV
+
     PROJECT_NAME: str = "movies"
 
-    UVICORN_RELOAD: bool = False
+    GUNICORN_RELOAD: bool = False
+    GUNICORN_WORKERS: int = multiprocessing.cpu_count() * 2 + 1
 
     REDIS_PATH: str = "redis:6379"
-
     ELASTIC_PATH: str = "elasticsearch:9200"
 
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    FILMS_CACHE_EXPIRE = 60 * 5
-    GENRES_CACHE_EXPIRE = 60 * 5
-    PERSONS_CACHE_EXPIRE = 60 * 5
+    FILMS_CACHE_EXPIRE: int = 60 * 5
+    GENRES_CACHE_EXPIRE: int = 60 * 5
+    PERSONS_CACHE_EXPIRE: int = 60 * 5
 
 
-class DevConfig(Config):
-    UVICORN_RELOAD = True
+class DevConfig(ProdConfig):
+    GUNICORN_RELOAD = True
+    GUNICORN_WORKERS = 1
 
 
 env_2_config = {
     EnvTypes.DEV: DevConfig,
-    EnvTypes.PROD: Config,
+    EnvTypes.PROD: ProdConfig,
 }
-
 
 environment = Environment().ENVIRONMENT
 config = env_2_config[environment]()
