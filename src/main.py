@@ -46,5 +46,5 @@ if __name__ == "__main__":
         port=5000,
         log_config=LOGGING,
         log_level=logging.DEBUG,
-        reload=config.UVICORN_RELOAD,
+        reload=config.GUNICORN_RELOAD,
     )

@@ -1,6 +1,5 @@
-from src.core.logger import LOGGING
 from src.core.config import config as app_config
-
+from src.core.logger import LOGGING
 
 bind = "0.0.0.0:5000"
 worker_class = "uvicorn.workers.UvicornWorker"
