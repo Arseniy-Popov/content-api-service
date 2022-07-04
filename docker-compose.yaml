@@ -10,7 +10,7 @@ services:
             - PYTHONUNBUFFERED=1
             - PYTHONDONTWRITEBYTECODE=1
             - REDIS_PATH=redis://redis:6379/0
-            - ELASTICSEARCH_PATH=http://elasticsearch:9200
+            - ELASTIC_PATH=http://elasticsearch:9200
         env_file:
             - ./.env
         networks:
@@ -50,5 +50,5 @@ volumes:
     elasticsearch:
 
 networks:
-  cinema-network:
-    name: cinema-network
+    cinema-network:
+        name: cinema-network
