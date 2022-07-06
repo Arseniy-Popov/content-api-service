@@ -57,12 +57,13 @@ class FilmService:
                     "multi_match",
                     query=query_string,
                     fields=[
-                        "title^3",
-                        "description",
+                        "title^4",
+                        "description^2",
                         "actors_names",
                         "writers_names",
                         "directors_names",
                     ],
+                    fuzziness=2,
                 )
             ]
         search = paginate(search, page_number, page_size)
