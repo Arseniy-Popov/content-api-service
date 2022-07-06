@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Protocol
 
 from aioredis import Redis
 
@@ -10,7 +10,15 @@ async def get_redis() -> Redis | None:
     return redis
 
 
-class RedisAdapter:
+class CacheProtocol(Protocol):
+    async def set(self, key: str, value: Any) -> None:
+        ...
+
+    async def get(self, key: str) -> list | dict | None:
+        ...
+
+
+class RedisAdapter(CacheProtocol):
     def __init__(self, redis: Redis):
         self.redis = redis
 
