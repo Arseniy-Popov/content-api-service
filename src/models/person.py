@@ -8,7 +8,7 @@ from models.base import BaseDBModel
 class FilmShort(BaseDBModel):
     id: UUID
     title: str
-    imdb_rating: int | None = None
+    imdb_rating: float | None = None
 
 
 class Person(BaseDBModel):
