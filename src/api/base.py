@@ -17,7 +17,7 @@ def pages_count(num_hits: int, page_size: int) -> int:
 
 def paginate(num_hits, page_size, page_number, items) -> PaginatedResponse:
     return PaginatedResponse(
-        pages_count=pages_count(num_hits, page_size),
+        pages_count=max(1, pages_count(num_hits, page_size)),
         page_number=page_number,
         results=items,
     )
