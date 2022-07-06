@@ -29,6 +29,7 @@ class GenreService:
     async def list(self) -> list[Genre]:
         search = Search(index=ElasticIndexes.GENRES)
         search = search[0:1000]
+        search = search.sort("name.raw")
         results = await self.elastic.search(search)
         return [Genre(**doc) for doc in results.docs]
 
