@@ -44,9 +44,14 @@ class DevConfig(ProdConfig):
     GUNICORN_WORKERS = 1
 
 
+class TestConfig(ProdConfig):
+    GUNICORN_RELOAD = True
+
+
 env_2_config = {
     EnvTypes.DEV: DevConfig,
     EnvTypes.PROD: ProdConfig,
+    EnvTypes.TEST: TestConfig,
 }
 
 environment = Environment().ENVIRONMENT

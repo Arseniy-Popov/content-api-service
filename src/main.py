@@ -25,7 +25,7 @@ async def startup():
     redis.redis = aioredis.from_url(
         f"redis://{config.REDIS_PATH}", encoding="utf-8", decode_responses=True
     )
-    elastic.elastic = AsyncElasticsearch(hosts=[f"{config.ELASTIC_PATH}"])
+    elastic.elastic = AsyncElasticsearch(hosts=[config.ELASTIC_PATH])
 
 
 @app.on_event("shutdown")
