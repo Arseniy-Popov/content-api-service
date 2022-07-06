@@ -39,7 +39,7 @@ class PersonService:
         self, query_string: str, page_number: int, page_size: int
     ) -> tuple[list[Person], int]:
         search = Search(index=ElasticIndexes.PERSONS)
-        search.query = Q("match", full_name=query_string)
+        search.query = Q("match", full_name={"query": query_string, "fuzziness": 2})
         search = paginate(search, page_number, page_size)
 
         results = await self.elastic.search(search)
