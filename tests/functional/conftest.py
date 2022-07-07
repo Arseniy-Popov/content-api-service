@@ -10,7 +10,7 @@ from data.data import films, genres, persons
 from data.indexes import ES_GENRES_SCHEMA, ES_MOVIES_SCHEMA, ES_PERSONS_SCHEMA
 from data.models import BaseModel
 from elasticsearch import AsyncElasticsearch
-from utils.utils import elastic_connection, redis_connection
+from utils.base import elastic_connection, redis_connection
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -50,7 +50,7 @@ class Response:
 @pytest.fixture(scope="session")
 async def client(session):
     class Client:
-        path = "http://localhost:80" + "/api/v1"
+        path = config.APP_PATH + "/api/v1"
 
         async def _make_request(self, method: str, path: str, **kwargs):
             path = self.path + path

@@ -2,6 +2,7 @@ services:
     app:
         environment:
             - ENVIRONMENT=development
+    elasticsearch:
         ports:
             - 9200:9200
     redis:

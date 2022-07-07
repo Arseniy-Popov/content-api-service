@@ -46,6 +46,7 @@ class DevConfig(ProdConfig):
 
 class TestConfig(ProdConfig):
     GUNICORN_RELOAD = True
+    GUNICORN_WORKERS = 1
 
 
 env_2_config = {

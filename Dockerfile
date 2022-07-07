@@ -15,4 +15,3 @@ RUN poetry install --no-dev
 COPY . ./
 
 CMD gunicorn -c infra/gunicorn/gunicorn.conf.py main:app
-# CMD gunicorn main:app

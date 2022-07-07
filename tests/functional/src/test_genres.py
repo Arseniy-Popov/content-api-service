@@ -3,8 +3,7 @@ import uuid
 import pytest
 from conftest import clear_indexes
 from data.data import genre_sci_fi, genres
-
-from tests.functional.data.models import Genre
+from data.models import Genre
 
 
 class TestList:

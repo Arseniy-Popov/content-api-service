@@ -3,7 +3,7 @@ from contextlib import suppress
 
 from aioredis.exceptions import ConnectionError
 from config import config
-from utils.utils import redis_connection
+from utils.base import redis_connection
 
 
 async def wait_for_redis():

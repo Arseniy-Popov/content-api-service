@@ -1,0 +1,19 @@
+services:
+    test:
+        build: ./tests/functional
+        volumes:
+            - ./tests/functional:/app
+        environment:
+            - ENVIRONMENT=production
+            - PYTHONUNBUFFERED=1
+            - PYTHONDONTWRITEBYTECODE=1
+            - REDIS_PATH=redis://redis:6379/0
+            - ELASTIC_PATH=http://elasticsearch:9200
+            - APP_PATH=http://nginx:80
+        depends_on:
+            - app
+            - nginx
+            - elasticsearch
+            - redis
+        networks:
+          - cinema-network

@@ -6,6 +6,7 @@ class Config(BaseSettings):
         env_prefix = ""
         env_file = ".env"
 
+    APP_PATH: str = "http://localhost:80"
     REDIS_PATH: str = "redis://localhost:6379/0"
     ELASTIC_PATH: str = "http://localhost:9200"
 

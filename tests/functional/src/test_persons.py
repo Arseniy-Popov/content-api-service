@@ -4,9 +4,8 @@ import pytest
 from config import config
 from conftest import clear_and_populate_index, clear_indexes
 from data.data import film_1, film_2, film_3, person_lucas
+from data.indexes import ES_PERSONS_SCHEMA
 from data.models import Person
-
-from tests.functional.data.indexes import ES_PERSONS_SCHEMA
 
 
 class TestSearch:

@@ -1,7 +1,7 @@
 import asyncio
 
 from config import config
-from utils.utils import elastic_connection
+from utils.base import elastic_connection
 
 
 async def wait_for_elastic():

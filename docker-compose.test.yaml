@@ -1,29 +1,11 @@
 services:
-    # tests:
-    #     build:
-    #         context: ./.
-    #         dockerfile: Dockerfile
-    #     depends_on:
-    #         - app
-    #         - elasticsearch
-    #         - redis
-    #         - nginx
-    #     volumes:
-    #         - ./:/tests
-    #     environment:
-    #         - ENVIRONMENT=production
-    #         - PYTHONUNBUFFERED=1
-    #         - PYTHONDONTWRITEBYTECODE=1
-    #         - REDIS_PATH=redis://redis:6379/0
-    #         - ELASTICSEARCH_PATH=http://elasticsearch:9200
-    #     env_file:
-    #         - ./.env
     app:
+        container_name: app-test
         build:
-            context: ../../.
-            dockerfile: ../../Dockerfile
+            context: ./
+            dockerfile: Dockerfile
         volumes:
-            - ../../.:/app
+            - ./:/app
         environment:
             - ENVIRONMENT=testing
             - PYTHONUNBUFFERED=1
@@ -32,30 +14,49 @@ services:
             - ELASTIC_PATH=http://elasticsearch:9200
         env_file:
             - ./.env
+        networks:
+          - cinema-network
+        restart: unless-stopped
     nginx:
-        build: ../../infra/nginx
+        container_name: nginx-test
+        build: ./infra/nginx
         ports:
             - 80:80
         depends_on:
             - app
+        networks:
+          - cinema-network
+        restart: unless-stopped
     elasticsearch:
+        container_name: elasticsearch-test
         image: elasticsearch:8.2.2
         environment:
             - discovery.type=single-node
             - xpack.security.http.ssl.enabled=false
             - xpack.security.enabled=false
         volumes:
-            - elasticsearch:/usr/share/elasticsearch/data
+            - elasticsearch-test:/usr/share/elasticsearch/data
         expose:
             - 9200
         ports:
             - 9200:9200
+        networks:
+          - cinema-network
+        restart: unless-stopped
     redis:
+        container_name: redis-test
         image: redis
         expose:
             - 6379
         ports:
             - 6379:6379
+        networks:
+          - cinema-network
+        restart: unless-stopped
 
 volumes:
-    elasticsearch:
+    elasticsearch-test:
+
+networks:
+    cinema-network:
+        name: cinema-network
