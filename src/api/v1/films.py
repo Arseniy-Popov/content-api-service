@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from api.base import PaginatedResponse, paginate
+from api.base import PaginatedResponse, Paginator
 from api.v1.schemas import FilmLongSchema, FilmShortSchema
 from services.film import FilmService, get_film_service
 
@@ -22,8 +22,7 @@ class SortFilmsOptions(str, Enum):
 async def list_films(
     sort: SortFilmsOptions = Query(default=SortFilmsOptions.RATING_DESC),
     genre: UUID | None = Query(default=None, alias="filter[genre]"),
-    page_number: int = Query(default=1, ge=1, alias="page[number]"),
-    page_size: int = Query(default=50, ge=1, alias="page[size]"),
+    paginator: Paginator = Depends(Paginator),
     film_service: FilmService = Depends(get_film_service),
 ) -> PaginatedResponse[FilmShortSchema]:
     """
@@ -31,10 +30,10 @@ async def list_films(
     filtered by genre.
     """
     films, num_hits = await film_service.search(
-        None, sort, genre, page_number, page_size
+        None, sort, genre, paginator.page_number, paginator.page_size
     )
     films = [FilmShortSchema.from_model(film) for film in films]
-    return paginate(num_hits, page_size, page_number, films)
+    return paginator.page(num_hits, films)
 
 
 @router.get(
@@ -42,8 +41,7 @@ async def list_films(
 )
 async def search_films(
     query: str,
-    page_number: int = Query(default=1, ge=1, alias="page[number]"),
-    page_size: int = Query(default=50, ge=1, alias="page[size]"),
+    paginator: Paginator = Depends(Paginator),
     film_service: FilmService = Depends(get_film_service),
 ) -> PaginatedResponse[FilmShortSchema]:
     """
@@ -57,10 +55,10 @@ async def search_films(
     - directors' names
     """
     films, num_hits = await film_service.search(
-        query, None, None, page_number, page_size
+        query, None, None, paginator.page_number, paginator.page_size
     )
     films = [FilmShortSchema.from_model(film) for film in films]
-    return paginate(num_hits, page_size, page_number, films)
+    return paginator.page(num_hits, films)
 
 
 @router.get("/{film_id}", response_model=FilmLongSchema, summary="Retrieve Film")

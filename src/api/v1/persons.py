@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from api.base import PaginatedResponse, paginate
+from api.base import PaginatedResponse, Paginator
 from api.v1.schemas import PersonSchema, PersonsFilmsSchema
 from services.person import PersonService, get_person_service
 
@@ -14,8 +14,7 @@ router = APIRouter()
 )
 async def search_persons(
     query: str,
-    page_number: int = Query(default=1, ge=1, alias="page[number]"),
-    page_size: int = Query(default=50, ge=1, alias="page[size]"),
+    paginator: Paginator = Depends(Paginator),
     person_service: PersonService = Depends(get_person_service),
 ) -> PaginatedResponse[PersonSchema]:
     """
@@ -23,9 +22,11 @@ async def search_persons(
 
     The search is conducted only on the full name attribute.
     """
-    persons, num_hits = await person_service.search(query, page_number, page_size)
+    persons, num_hits = await person_service.search(
+        query, paginator.page_number, paginator.page_size
+    )
     persons = [PersonSchema.from_model(person) for person in persons]
-    return paginate(num_hits, page_size, page_number, persons)
+    return paginator.page(num_hits, persons)
 
 
 @router.get("/{person_id}", response_model=PersonSchema, summary="Retrieve Person")
