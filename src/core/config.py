@@ -31,8 +31,8 @@ class ProdConfig(BaseSettings):
     GUNICORN_RELOAD: bool = False
     GUNICORN_WORKERS: int = multiprocessing.cpu_count() * 2 + 1
 
-    REDIS_PATH: str = "redis:6379"
-    ELASTIC_PATH: str = "elasticsearch:9200"
+    REDIS_PATH: str = "redis://redis:6379/0"
+    ELASTIC_PATH: str = "http://elasticsearch:9200"
 
     FILMS_CACHE_EXPIRE: int = 60 * 5
     GENRES_CACHE_EXPIRE: int = 60 * 5
@@ -40,6 +40,9 @@ class ProdConfig(BaseSettings):
 
 
 class DevConfig(ProdConfig):
+    REDIS_PATH: str = "redis://127.0.0.1:6379/0"
+    ELASTIC_PATH: str = "http://127.0.0.1:9200"
+
     GUNICORN_RELOAD = True
     GUNICORN_WORKERS = 1
 
