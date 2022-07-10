@@ -9,7 +9,7 @@ from fastapi.responses import ORJSONResponse
 from api.v1 import films, genres, persons
 from core.config import config
 from core.logger import LOGGING
-from db import elastic, redis
+from db import cache, elastic
 
 app = FastAPI(
     title=config.PROJECT_NAME,
@@ -22,16 +22,16 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup():
-    redis.redis = aioredis.from_url(
-        f"redis://{config.REDIS_PATH}", encoding="utf-8", decode_responses=True
+    cache.redis_client = aioredis.from_url(
+        f"{config.REDIS_PATH}", encoding="utf-8", decode_responses=True
     )
-    elastic.elastic = AsyncElasticsearch(hosts=[config.ELASTIC_PATH])
+    elastic.elastic_client = AsyncElasticsearch(hosts=[config.ELASTIC_PATH])
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    await redis.close()
-    await elastic.close()
+    await cache.redis_client.close()
+    await elastic.elastic_client.close()
 
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["films"])

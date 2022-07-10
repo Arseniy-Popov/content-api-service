@@ -7,13 +7,9 @@ from uuid import UUID
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from elasticsearch_dsl import Search
 
-from db.redis import CacheProtocol
+from db.cache import CacheAdapterProtocol
 
-elastic: AsyncElasticsearch | None = None
-
-
-async def get_elastic() -> AsyncElasticsearch:
-    return elastic
+elastic_client: AsyncElasticsearch | None = None
 
 
 @dataclass
@@ -62,7 +58,9 @@ class ElasticAdapter(ElasticAdapterProtocol):
 
 
 class CachedElasticDecorator(ElasticAdapterProtocol):
-    def __init__(self, elastic: ElasticAdapterProtocol, cache: CacheProtocol, ttl: int):
+    def __init__(
+        self, elastic: ElasticAdapterProtocol, cache: CacheAdapterProtocol, ttl: int
+    ):
         self.elastic = elastic
         self.cache = cache
         self.ttl = ttl
@@ -82,3 +80,7 @@ class CachedElasticDecorator(ElasticAdapterProtocol):
         data = await self.elastic.search(search)
         await self.cache.set(key, asdict(data))
         return data
+
+
+async def get_elastic() -> ElasticAdapterProtocol:
+    return ElasticAdapter(elastic_client)

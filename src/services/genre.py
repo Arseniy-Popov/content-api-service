@@ -1,30 +1,23 @@
 from functools import lru_cache
 from uuid import UUID
 
-from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
 from elasticsearch_dsl import Search
 from fastapi import Depends
 
 from core.config import config
+from db.cache import CacheAdapterProtocol, get_cache
 from db.elastic import (
     CachedElasticDecorator,
-    ElasticAdapter,
+    ElasticAdapterProtocol,
     ElasticIndexes,
     get_elastic,
 )
-from db.redis import RedisAdapter, get_redis
 from models.genre import Genre
 
 
 class GenreService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = CachedElasticDecorator(
-            ElasticAdapter(elastic),
-            RedisAdapter(self.redis),
-            config.GENRES_CACHE_EXPIRE,
-        )
+    def __init__(self, cache: CacheAdapterProtocol, elastic: ElasticAdapterProtocol):
+        self.elastic = CachedElasticDecorator(elastic, cache, config.FILMS_CACHE_EXPIRE)
 
     async def list(self) -> list[Genre]:
         search = Search(index=ElasticIndexes.GENRES)
@@ -41,7 +34,7 @@ class GenreService:
 
 @lru_cache()
 def get_genre_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    cache: CacheAdapterProtocol = Depends(get_cache),
+    elastic: ElasticAdapterProtocol = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(redis, elastic)
+    return GenreService(cache, elastic)

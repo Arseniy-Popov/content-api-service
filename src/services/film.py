@@ -1,29 +1,24 @@
 from functools import lru_cache
 from uuid import UUID
 
-from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
 from elasticsearch_dsl import Q, Search
 from fastapi import Depends
 
 from core.config import config
+from db.cache import CacheAdapterProtocol, get_cache
 from db.elastic import (
     CachedElasticDecorator,
-    ElasticAdapter,
+    ElasticAdapterProtocol,
     ElasticIndexes,
     get_elastic,
 )
-from db.redis import RedisAdapter, get_redis
 from models.film import Film
 from services.base import paginate
 
 
 class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = CachedElasticDecorator(
-            ElasticAdapter(elastic), RedisAdapter(self.redis), config.FILMS_CACHE_EXPIRE
-        )
+    def __init__(self, cache: CacheAdapterProtocol, elastic: ElasticAdapterProtocol):
+        self.elastic = CachedElasticDecorator(elastic, cache, config.FILMS_CACHE_EXPIRE)
 
     async def retrieve(self, film_id: UUID) -> Film | None:
         if film := await self.elastic.get(index=ElasticIndexes.MOVIES, id=film_id):
@@ -78,7 +73,7 @@ class FilmService:
 
 @lru_cache()
 def get_film_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    cache: CacheAdapterProtocol = Depends(get_cache),
+    elastic: ElasticAdapterProtocol = Depends(get_elastic),
 ) -> FilmService:
-    return FilmService(redis, elastic)
+    return FilmService(cache, elastic)

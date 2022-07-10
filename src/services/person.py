@@ -1,33 +1,26 @@
 from functools import lru_cache
 from uuid import UUID
 
-from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
 from elasticsearch_dsl import Q, Search
 from elasticsearch_dsl.query import Terms
 from fastapi import Depends
 
 from core.config import config
+from db.cache import CacheAdapterProtocol, get_cache
 from db.elastic import (
     CachedElasticDecorator,
-    ElasticAdapter,
+    ElasticAdapterProtocol,
     ElasticIndexes,
     get_elastic,
 )
-from db.redis import RedisAdapter, get_redis
 from models.film import Film
 from models.person import FilmShort, Person, PersonsFilms
 from services.base import paginate
 
 
 class PersonService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = CachedElasticDecorator(
-            ElasticAdapter(elastic),
-            RedisAdapter(self.redis),
-            config.GENRES_CACHE_EXPIRE,
-        )
+    def __init__(self, cache: CacheAdapterProtocol, elastic: ElasticAdapterProtocol):
+        self.elastic = CachedElasticDecorator(elastic, cache, config.FILMS_CACHE_EXPIRE)
 
     async def retrieve(self, id: UUID) -> Person | None:
         if not (person := await self.elastic.get(index=ElasticIndexes.PERSONS, id=id)):
@@ -76,7 +69,7 @@ class PersonService:
 
 @lru_cache()
 def get_person_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    cache: CacheAdapterProtocol = Depends(get_cache),
+    elastic: ElasticAdapterProtocol = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(redis, elastic)
+    return PersonService(cache, elastic)

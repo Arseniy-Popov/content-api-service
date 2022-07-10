@@ -1,24 +1,23 @@
 import json
+from abc import abstractmethod
 from typing import Any, Protocol
 
 from aioredis import Redis
 
-redis: Redis | None = None
+redis_client: Redis | None = None
 
 
-async def get_redis() -> Redis | None:
-    return redis
-
-
-class CacheProtocol(Protocol):
+class CacheAdapterProtocol(Protocol):
+    @abstractmethod
     async def set(self, key: str, value: Any) -> None:
         ...
 
+    @abstractmethod
     async def get(self, key: str) -> list | dict | None:
         ...
 
 
-class RedisAdapter(CacheProtocol):
+class RedisAdapter(CacheAdapterProtocol):
     def __init__(self, redis: Redis):
         self.redis = redis
 
@@ -30,3 +29,7 @@ class RedisAdapter(CacheProtocol):
         if value := await self.redis.get(key):
             return json.loads(value)
         return None
+
+
+async def get_cache() -> CacheAdapterProtocol:
+    return RedisAdapter(redis_client)
